@@ -1,0 +1,76 @@
+import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
+
+
+public class FilterJob extends Configured implements Tool{
+
+    
+    public int run(String[] args) throws Exception {
+        if(args.length<2) {
+            System.out.println("pla give input and output directory propery");
+        return -1;
+        }
+        JobConf conf = new JobConf(FilterJob.class);
+        FileInputFormat.setInputPaths(conf,new Path(args[0]));
+        FileOutputFormat.setOutputPath(conf,new Path(args[1]));
+        
+conf.setMapperClass(FilterMapper.class);
+        
+conf.setMapOutputKeyClass(Text.class);
+conf.setMapOutputValueClass(IntWritable.class);
+
+conf.setOutputKeyClass(Text.class);
+conf.setMapOutputValueClass(IntWritable.class);
+
+JobClient.runJob(conf);
+        return 0;
+
+    }
+public static void main(String args[]) throws Exception {
+    int exitCode = ToolRunner.run(new FilterJob(), args);
+    System.exit(exitCode);
+}
+    
+}
+
+
+
+
+-------- Mapper Code--------------------------------
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
+public class FilterMapper extends MapReduceBase implements
+ Mapper<LongWritable,Text,Text,IntWritable>{
+ public void map(LongWritable key, Text value,
+   OutputCollector<Text, IntWritable> output, Reporter r)
+   throws IOException {
+  //List<String> filterList = new ArrayList<String>();
+    String s = value.toString();
+    //for (String word:s.split("|")){
+    if(s.contains("NA")){
+     //filterList.add(s);
+         output.collect(new Text(s), new IntWritable(1));
+            }
+  //for (String word:s.split("|")) {
+   //if (word.length()>0) {
+  // }
+//  }
+  
+    }
+ }
